@@ -13,14 +13,14 @@ struct EmojiArtModel {
     var emojis = [Emoji]()
 
     struct Emoji: Identifiable, Hashable {
-        let emoji: String
-        var x: Int
-        var y: Int
+        let text: String
+        var x: Int // offset from the center
+        var y: Int // offset from the center
         var size: Int
         let id: Int
         
         fileprivate init(text: String,x: Int, y: Int, size: Int, id: Int) {
-            self.emoji = text
+            self.text = text
             self.x = x
             self.y = y
             self.size = size
