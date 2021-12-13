@@ -10,7 +10,7 @@ import SwiftUI
 class EmojiArtViewModel: ObservableObject {
     @Published private(set) var emojiArt: EmojiArtModel {
         didSet {
-            autosave()
+            scheduledAutosave()
             if emojiArt.background != oldValue.background {
                 fetchBackgroundImgaeIfNecessary()
             }
@@ -22,6 +22,17 @@ class EmojiArtViewModel: ObservableObject {
         static var url: URL? {
             let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
             return documentDirectory?.appendingPathComponent(filename)
+        }
+        
+        static let coalescingInterval = 5.0
+    }
+    
+    private var autosaveTimer: Timer?
+    
+    private func scheduledAutosave() {
+        autosaveTimer?.invalidate()
+        Timer.scheduledTimer(withTimeInterval: Autosave.coalescingInterval, repeats: false) { _ in
+            self.autosave()
         }
     }
     
