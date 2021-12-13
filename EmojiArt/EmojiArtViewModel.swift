@@ -10,9 +10,34 @@ import SwiftUI
 class EmojiArtViewModel: ObservableObject {
     @Published private(set) var emojiArt: EmojiArtModel {
         didSet {
+            autosave()
             if emojiArt.background != oldValue.background {
                 fetchBackgroundImgaeIfNecessary()
             }
+        }
+    }
+    
+    private struct Autosave {
+        static let filename = "Autosave.emojiart"
+        static var url: URL? {
+            let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            return documentDirectory?.appendingPathComponent(filename)
+        }
+    }
+    
+    private func autosave() {
+        if let url = Autosave.url {
+            save(to: url)
+        }
+    }
+    
+    private func save(to url: URL ) {
+        let thisFunction = "\(String(describing: self)).\(#function)"
+        do {
+            let data = try emojiArt.getJson()
+            try data.write(to: url)
+        } catch {
+            print("\(thisFunction) error: \(error)")
         }
     }
     
