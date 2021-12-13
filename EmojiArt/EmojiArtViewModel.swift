@@ -42,7 +42,12 @@ class EmojiArtViewModel: ObservableObject {
     }
     
     init(){
-        emojiArt = EmojiArtModel()
+        if let url = Autosave.url, let autosavedEmojiArt = try? EmojiArtModel(url: url) {
+            emojiArt = autosavedEmojiArt
+            fetchBackgroundImgaeIfNecessary()
+        } else {
+            emojiArt = EmojiArtModel()
+        }
     }
     
     var emojis: [EmojiArtModel.Emoji] {emojiArt.emojis}

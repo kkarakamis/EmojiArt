@@ -28,6 +28,19 @@ struct EmojiArtModel: Codable {
         }
     }
     
+    
+    init(json: Data) throws {
+        self = try JSONDecoder().decode(EmojiArtModel.self, from: json)
+        
+    }
+    
+    init(url: URL) throws {
+        let data = try Data(contentsOf: url)
+        self = try EmojiArtModel(json: data)
+    }
+    
+    init() {}
+    
     func getJson() throws -> Data {
         try JSONEncoder().encode(self)
     }
