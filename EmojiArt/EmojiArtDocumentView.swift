@@ -1,5 +1,5 @@
 //
-//  EmojiArtView.swift
+//  EmojiArtDocumentView.swift
 //  EmojiArt
 //
 //  Created by Kutay Karakamış on 9.12.2021.
@@ -7,15 +7,15 @@
 
 import SwiftUI
 
-struct EmojiArtView: View {
-    @ObservedObject var document: EmojiArtViewModel
+struct EmojiArtDocumentView: View {
+    @ObservedObject var document: EmojiArtDocumentViewModel
     
     let defaultEmojiFontSize: CGFloat = 40
     
     var body: some View {
         VStack(spacing: 0) {
             documentBody
-            paletteBody
+            PaletteChooser(emojiFontSize: defaultEmojiFontSize)
         }
     }
     
@@ -44,8 +44,38 @@ struct EmojiArtView: View {
                 drop(providers: providers, at: location, in: geometry)
             }
             .gesture(panGesture().simultaneously(with: zoomGesture()))
+            .alert(item: $alertToShow) { alertToShow in
+                // return Alert
+                alertToShow.alert()
+            }
+            // L12 monitor fetch status and alert user if fetch failed
+            .onChange(of: document.backgroundImageFetchStatus) { status in
+                switch status {
+                case .failed(let url):
+                    showBackgroundImageFetchFailedAlert(url)
+                default:
+                    break
+                }
+            }
+
         }
     }
+    
+    
+    // L12 state which says whether a certain identifiable alert should be showing
+    @State private var alertToShow: IdentifiableAlert?
+    
+    // L12 sets alertToShow to an IdentifiableAlert explaining a url fetch failure
+    private func showBackgroundImageFetchFailedAlert(_ url: URL) {
+        alertToShow = IdentifiableAlert(id: "fetch failed: " + url.absoluteString, alert: {
+            Alert(
+                title: Text("Background Image Fetch"),
+                message: Text("Couldn't load image from \(url)."),
+                dismissButton: .default(Text("OK"))
+            )
+        })
+    }
+    
     
     private func drop(providers: [NSItemProvider], at location: CGPoint, in geometry: GeometryProxy) -> Bool {
         var found = providers.loadObjects(ofType: URL.self) { url in
@@ -168,6 +198,6 @@ struct EmojiArtView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        EmojiArtView(document: EmojiArtViewModel())
+        EmojiArtDocumentView(document: EmojiArtDocumentViewModel())
     }
 }

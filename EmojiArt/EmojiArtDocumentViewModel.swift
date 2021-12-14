@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-class EmojiArtViewModel: ObservableObject {
+class EmojiArtDocumentViewModel: ObservableObject {
     @Published private(set) var emojiArt: EmojiArtModel {
         didSet {
             scheduledAutosave()
@@ -67,8 +67,8 @@ class EmojiArtViewModel: ObservableObject {
     @Published var backgroundImage: UIImage?
     @Published var backgroundImageFetchStatus = BackgroundImageFetchStatus.idle
     
-    enum BackgroundImageFetchStatus {
-        case idle, fetching
+    enum BackgroundImageFetchStatus: Equatable {
+        case idle, fetching, failed(URL)
     }
     
     private func fetchBackgroundImgaeIfNecessary() {
@@ -76,13 +76,16 @@ class EmojiArtViewModel: ObservableObject {
         switch emojiArt.background {
         case .url(let url):
             backgroundImageFetchStatus = .fetching
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            DispatchQueue.global(qos: .userInitiated).async {
                 let imageData = try? Data(contentsOf: url)
-                if let data = imageData {
-                    DispatchQueue.main.async { //[weak self] in
+                DispatchQueue.main.async { [weak self] in
+                    if self?.emojiArt.background == EmojiArtModel.Background.url(url) {
                         self?.backgroundImageFetchStatus = .idle
-                        if self?.emojiArt.background == EmojiArtModel.Background.url(url) {
-                            self?.backgroundImage = UIImage(data: data)
+                        if imageData != nil {
+                            self?.backgroundImage = UIImage(data: imageData!)
+                        }
+                        if self?.backgroundImage == nil {
+                            self?.backgroundImageFetchStatus = .failed(url)
                         }
                     }
                 }
@@ -111,7 +114,7 @@ class EmojiArtViewModel: ObservableObject {
         }
     }
     
-    func moveEmoji(_ emoji: EmojiArtModel.Emoji, by scale: CGFloat) {
+    func scaleEmoji(_ emoji: EmojiArtModel.Emoji, by scale: CGFloat) {
         if let index = emojiArt.emojis.index(matching: emoji) {
             emojiArt.emojis[index].size = Int((CGFloat(emojiArt.emojis[index].size) * scale).rounded(.toNearestOrAwayFromZero))
         }
