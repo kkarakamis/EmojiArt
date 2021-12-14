@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3A28D9D12768BC7A0005CB85 /* PaletteChooserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A28D9D02768BC7A0005CB85 /* PaletteChooserView.swift */; };
 		3AA0562927677F3800F99412 /* PaletteViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AA0562827677F3800F99412 /* PaletteViewModel.swift */; };
 		3AFD1FA72761FF34006A849B /* EmojiArtApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFD1FA62761FF34006A849B /* EmojiArtApp.swift */; };
 		3AFD1FA92761FF34006A849B /* EmojiArtDocumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AFD1FA82761FF34006A849B /* EmojiArtDocumentView.swift */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3A28D9D02768BC7A0005CB85 /* PaletteChooserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteChooserView.swift; sourceTree = "<group>"; };
 		3AA0562827677F3800F99412 /* PaletteViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteViewModel.swift; sourceTree = "<group>"; };
 		3AFD1FA32761FF34006A849B /* EmojiArt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EmojiArt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AFD1FA62761FF34006A849B /* EmojiArtApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiArtApp.swift; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 				3AFD1FC027632F5C006A849B /* Extensions+Stanford */,
 				3AFD1FB42761FF43006A849B /* Models */,
 				3AA0562827677F3800F99412 /* PaletteViewModel.swift */,
+				3A28D9D02768BC7A0005CB85 /* PaletteChooserView.swift */,
 				3AFD1FBC276206F0006A849B /* EmojiArtDocumentViewModel.swift */,
 				3AFD1FA82761FF34006A849B /* EmojiArtDocumentView.swift */,
 				3AFD1FA62761FF34006A849B /* EmojiArtApp.swift */,
@@ -183,6 +186,7 @@
 				3AFD1FA92761FF34006A849B /* EmojiArtDocumentView.swift in Sources */,
 				3AFD1FA72761FF34006A849B /* EmojiArtApp.swift in Sources */,
 				3AFD1FB62761FF55006A849B /* EmojiArtModel.swift in Sources */,
+				3A28D9D12768BC7A0005CB85 /* PaletteChooserView.swift in Sources */,
 				3AA0562927677F3800F99412 /* PaletteViewModel.swift in Sources */,
 				3AFD1FBD276206F0006A849B /* EmojiArtDocumentViewModel.swift in Sources */,
 				3AFD1FC427632F78006A849B /* UtilityExtensions.swift in Sources */,
