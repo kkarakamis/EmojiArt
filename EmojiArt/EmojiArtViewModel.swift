@@ -78,9 +78,9 @@ class EmojiArtViewModel: ObservableObject {
             backgroundImageFetchStatus = .fetching
             DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                 let imageData = try? Data(contentsOf: url)
-                self?.backgroundImageFetchStatus = .idle
                 if let data = imageData {
                     DispatchQueue.main.async { //[weak self] in
+                        self?.backgroundImageFetchStatus = .idle
                         if self?.emojiArt.background == EmojiArtModel.Background.url(url) {
                             self?.backgroundImage = UIImage(data: data)
                         }
