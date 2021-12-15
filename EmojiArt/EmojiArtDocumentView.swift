@@ -15,7 +15,7 @@ struct EmojiArtDocumentView: View {
     var body: some View {
         VStack(spacing: 0) {
             documentBody
-            PaletteChooser(emojiFontSize: defaultEmojiFontSize)
+            PaletteChooserView(emojiFontSize: defaultEmojiFontSize)
         }
     }
     
@@ -48,7 +48,6 @@ struct EmojiArtDocumentView: View {
                 // return Alert
                 alertToShow.alert()
             }
-            // L12 monitor fetch status and alert user if fetch failed
             .onChange(of: document.backgroundImageFetchStatus) { status in
                 switch status {
                 case .failed(let url):
@@ -57,7 +56,9 @@ struct EmojiArtDocumentView: View {
                     break
                 }
             }
-
+            .onReceive(document.$backgroundImage) { image in
+                zoomToFit(image, in: geometry.size)
+            }
         }
     }
     
