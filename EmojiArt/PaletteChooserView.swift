@@ -9,16 +9,14 @@ import SwiftUI
 
 import SwiftUI
 
-// L12 the main View of the Palette-choosing MVVM at the bottom of the screen
-
 struct PaletteChooserView: View {
-    var emojiFontSize: CGFloat = 40
+    @ScaledMetric var emojiFontSize: CGFloat = 40
     var emojiFont: Font { .system(size: emojiFontSize) }
     
     @EnvironmentObject var store: PaletteViewModel
     
-    @State private var chosenPaletteIndex = 0
-    
+    @SceneStorage("PaletteChooserView.chosenPaletteIndex") private var chosenPaletteIndex: Int = 0
+        
     var body: some View {
         HStack {
             paletteControlButton
