@@ -7,59 +7,45 @@
 
 import SwiftUI
 import Combine
+import UniformTypeIdentifiers
 
-class EmojiArtDocumentViewModel: ObservableObject {
+extension UTType {
+    static let emojiArt = UTType(exportedAs: "com.kkarakamis.emojiart")
+}
+
+class EmojiArtDocumentViewModel: ReferenceFileDocument {
+    
+    static var readableContentTypes = [UTType.emojiArt]
+    static var writableContentTypes = [UTType.emojiArt]
+    
+    required init(configuration: ReadConfiguration) throws {
+        if let data = configuration.file.regularFileContents {
+            emojiArt = try EmojiArtModel(json: data)
+            fetchBackgroundImgaeIfNecessary()
+        } else {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        
+    }
+    
+    func snapshot(contentType: UTType) throws -> Data {
+        try emojiArt.getJson()
+    }
+    
+    func fileWrapper(snapshot: Data, configuration: WriteConfiguration) throws -> FileWrapper {
+        FileWrapper(regularFileWithContents: snapshot)
+    }
+        
     @Published private(set) var emojiArt: EmojiArtModel {
         didSet {
-            scheduledAutosave()
             if emojiArt.background != oldValue.background {
                 fetchBackgroundImgaeIfNecessary()
             }
         }
     }
     
-    private struct Autosave {
-        static let filename = "Autosave.emojiart"
-        static var url: URL? {
-            let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-            return documentDirectory?.appendingPathComponent(filename)
-        }
-        
-        static let coalescingInterval = 5.0
-    }
-    
-    private var autosaveTimer: Timer?
-    
-    private func scheduledAutosave() {
-        autosaveTimer?.invalidate()
-        Timer.scheduledTimer(withTimeInterval: Autosave.coalescingInterval, repeats: false) { _ in
-            self.autosave()
-        }
-    }
-    
-    private func autosave() {
-        if let url = Autosave.url {
-            save(to: url)
-        }
-    }
-    
-    private func save(to url: URL ) {
-        let thisFunction = "\(String(describing: self)).\(#function)"
-        do {
-            let data = try emojiArt.getJson()
-            try data.write(to: url)
-        } catch {
-            print("\(thisFunction) error: \(error)")
-        }
-    }
-    
     init(){
-        if let url = Autosave.url, let autosavedEmojiArt = try? EmojiArtModel(url: url) {
-            emojiArt = autosavedEmojiArt
-            fetchBackgroundImgaeIfNecessary()
-        } else {
-            emojiArt = EmojiArtModel()
-        }
+        emojiArt = EmojiArtModel()
     }
     
     var emojis: [EmojiArtModel.Emoji] {emojiArt.emojis}
@@ -119,24 +105,45 @@ class EmojiArtDocumentViewModel: ObservableObject {
 
     // MARK: -Intent(s)
     
-    func setBackground(_ backgroundImage: EmojiArtModel.Background) {
-        emojiArt.background = backgroundImage
-    }
-    
-    func addEmoji(_ emoji: String, at location: (x: Int, y: Int), size: CGFloat) {
-        emojiArt.addEmoji(emoji, at: location, size: Int(size))
-    }
-    
-    func moveEmoji(_ emoji: EmojiArtModel.Emoji, by offset: CGSize) {
-        if let index = emojiArt.emojis.index(matching: emoji) {
-            emojiArt.emojis[index].x += Int(offset.width)
-            emojiArt.emojis[index].y += Int(offset.height)
+    func setBackground(_ backgroundImage: EmojiArtModel.Background, undoManager: UndoManager?) {
+        undoablyPerform(operation: "Set Background", with: undoManager) {
+            emojiArt.background = backgroundImage
         }
     }
     
-    func scaleEmoji(_ emoji: EmojiArtModel.Emoji, by scale: CGFloat) {
-        if let index = emojiArt.emojis.index(matching: emoji) {
-            emojiArt.emojis[index].size = Int((CGFloat(emojiArt.emojis[index].size) * scale).rounded(.toNearestOrAwayFromZero))
+    func addEmoji(_ emoji: String, at location: (x: Int, y: Int), size: CGFloat, undoManager: UndoManager?) {
+        undoablyPerform(operation: "Add \(emoji)", with: undoManager) {
+            emojiArt.addEmoji(emoji, at: location, size: Int(size))
         }
+    }
+    
+    func moveEmoji(_ emoji: EmojiArtModel.Emoji, by offset: CGSize, undoManager: UndoManager?) {
+        if let index = emojiArt.emojis.index(matching: emoji) {
+            undoablyPerform(operation: "Add \(emoji)", with: undoManager) {
+                emojiArt.emojis[index].x += Int(offset.width)
+                emojiArt.emojis[index].y += Int(offset.height)
+            }
+        }
+    }
+    
+    func scaleEmoji(_ emoji: EmojiArtModel.Emoji, by scale: CGFloat, undoManager: UndoManager?) {
+        if let index = emojiArt.emojis.index(matching: emoji) {
+            undoablyPerform(operation: "Add \(emoji)", with: undoManager) {
+                emojiArt.emojis[index].size = Int((CGFloat(emojiArt.emojis[index].size) * scale).rounded(.toNearestOrAwayFromZero))
+            }
+        }
+    }
+    
+    // MARK: - Undo
+    
+    private func undoablyPerform(operation: String, with undoManager: UndoManager? = nil, doit: () -> Void) {
+        let oldEmojiArt = emojiArt
+        doit()
+        undoManager?.registerUndo(withTarget: self) { myself in
+            myself.undoablyPerform(operation: operation, with: undoManager) {
+                myself.emojiArt = oldEmojiArt
+            }
+        }
+        undoManager?.setActionName(operation)
     }
 }
